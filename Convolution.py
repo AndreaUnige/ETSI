@@ -7,36 +7,35 @@ class Convolution:
     xPrePadded = None
 
     h = None
+    h_flipped = None
     hFlippedPostPadded = None
 
-    h_flipped = None
+    convolutionLength = 0
 
-    convLength = 0
+    nZerosPadding__prefix = 0
+    nZerosPadding__suffix = 0
 
-    nZerosPrefixPadding = 0
-    nZerosSuffixPadding = 0
-
-    result = np.array([])
+    convolutionResult = np.array([])
 
     def __init__(self, x1, x2):
         self.x = x1
         self.h = x2
 
-        self.convLength = len(self.x) + len(self.h) - 1
+        self.convolutionLength = len(self.x) + len(self.h) - 1
 
-        self.nZerosPrefixPadding = self.convLength - len(self.x)
-        self.nZerosSuffixPadding = self.convLength - len(self.h)
+        self.nZerosPadding__prefix = self.convolutionLength - len(self.x)
+        self.nZerosPadding__suffix = self.convolutionLength - len(self.h)
 
 
 
     def convolve(self):
         self.flip()
-        self.padOrignalSequence()
+        self.padOriginalSequence()
         self.padFlippedSequence()
 
         self.multiplyAndSum()
 
-        return self.result
+        return self.convolutionResult
 
 
 
@@ -45,18 +44,18 @@ class Convolution:
     def flip(self):
         self.h_flipped = np.flip(self.h)
 
-    def padOrignalSequence(self):
-        self.xPrePadded = self.padSequence(self.x, leftSidePad=self.nZerosPrefixPadding, rightSidePad=0)
+    def padOriginalSequence(self):
+        self.xPrePadded = self.padSequence(self.x, leftSidePad=self.nZerosPadding__prefix, rightSidePad=0)
 
     def padFlippedSequence(self):
         self.hFlippedPostPadded = self.padSequence(self.h_flipped, leftSidePad=0,
-                                                   rightSidePad=self.nZerosSuffixPadding)
+                                                   rightSidePad=self.nZerosPadding__suffix)
 
     def padSequence(self, sequence, leftSidePad, rightSidePad):
         return np.pad(sequence, (leftSidePad, rightSidePad), 'constant')
 
     def multiplyAndSum(self):
-        for i in range(0, self.convLength):
+        for i in range(0, self.convolutionLength):
             shifted = np.roll(self.hFlippedPostPadded, i)
             res = np.dot(self.xPrePadded, shifted)
-            self.result = np.append(self.result, res)
+            self.convolutionResult = np.append(self.convolutionResult, res)
